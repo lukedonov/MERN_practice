@@ -31,8 +31,8 @@ createUser = (req, res) => {
         message: 'User not created!'
       })
     })
-
+  }
+  
   module.exports = {
     createUser
   }
-}
