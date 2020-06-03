@@ -1,5 +1,9 @@
 const User = require('../models/UserModel')
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+
+const validateRegisterInput = require('../validation/register')
+const validateLoginInput = require('../validation/login')
 
 createUser = (req, res) => {
   const { errors, isValid } = validateRegisterInput(req.body)
