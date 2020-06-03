@@ -1,38 +1,37 @@
 const User = require('../models/UserModel')
+const bcrypt = require('bcrypt')
 
 createUser = (req, res) => {
-  const body = req.body
+  const { errors, isValid } = validateRegisterInput(req.body)
 
-  if (!body) {
-    return res.status(400).json({
-      success: false,
-      error: 'You must provide a user',
-    })
+  if (!isValid) {
+    return res.status(400).json(errors);
   }
 
-  const user = new User(body)
-
-  if(!user) {
-    return res.status(400).json({ success: false, error: err})
-  }
-
-  user
-    .save()
-    .then(() => {
-      return res.status(201).json({
-        success: true,
-        id: user._id,
-        message: 'User created!', 
+  User.findOne({ email: req.body.email }).then(user => {
+    if(user) {
+      return res.status(400).json({ email: "Email already exists" })
+    } else {
+      const newUser = new User({
+        name: req.body.name,
+        email: req.body.email,
+        username: req.body.email,
+        password: req.body.email,
       })
-    })
-    .catch(error => {
-      return res.status(400).json({
-        error,
-        message: 'User not created!'
-      })
-    })
-  }
-  
-  module.exports = {
-    createUser
-  }
+      
+      bcrypt.genSalt(10, (err, salt) => {
+        bcrypt.hash(newUser.password, salt, (err, hash) => {
+          if (err) throw err;
+          newUser.password = hash;
+          newUser
+          .save()
+          .then(user => res.json(user))
+          .catch(err => console.log(err))
+        });
+      });
+    }
+  })
+}
+    module.exports = {
+  createUser
+}
