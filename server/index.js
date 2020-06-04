@@ -1,8 +1,8 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
+const passport = require('passport')
 
-const db = require('./db')
 const userRouter = require('./routes/UserRouter')
 
 const app = express()
@@ -12,12 +12,24 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cors())
 app.use(bodyParser.json())
 
-db.on('error', console.error.bind(console, 'MongoDB connection error:'))
+const db = require("../config/keys").mongoURI;
+
+mongoose
+  .connect(
+    db,
+    { useNewUrlParser: true }
+  )
+  .then(() => console.log("MongoDB successfully connected"))
+  .catch(err => console.log(err));
 
 app.get('/', (req, res) => {
   res.send('Hello world')
 })
 
-app.use('/api', userRouter)
+app.use(passport.initialize())
+
+require('../config/passport')(passport);
+
+app.use('/api/users', userRouter)
 
 app.listen(port, () => console.log(`Server running on ${port}`))
